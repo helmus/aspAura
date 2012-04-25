@@ -26,7 +26,7 @@ namespace aspAura.Controllers.Controllers
         // GET /api/<controller>/5
         public Todo Get(int id)
         {
-            var getTodo = (from todo in _db.Todoes where todo.id == id select todo).FirstOrDefault();
+            var getTodo = _db.Todoes.Find(id);
             if(getTodo == null)
             {
                 throw new HttpResponseException(HttpStatusCode.NotFound);
@@ -37,7 +37,7 @@ namespace aspAura.Controllers.Controllers
         // POST /api/<controller>
         public HttpResponseMessage<Todo> Post(Todo todo)
         {
-            _db.Todoes.AddObject(todo);
+            _db.Todoes.Add(todo);
             _db.SaveChanges();
 
             return new HttpResponseMessage<Todo>(HttpStatusCode.Created);
@@ -46,20 +46,17 @@ namespace aspAura.Controllers.Controllers
         // PUT /api/<controller>/5
         public HttpResponseMessage Put(Todo todo)
         {
-            _db.Todoes.Attach(todo);
-             _db.ObjectStateManager.ChangeObjectState(todo, EntityState.Modified);
+            _db.Entry(todo).State = EntityState.Modified;
             _db.SaveChanges();
-
             return new HttpResponseMessage(HttpStatusCode.NoContent);
         }
 
         // DELETE /api/<controller>/5
         public HttpResponseMessage Delete(int id)
         {
-            var stubDelete = new Todo {id = id};
-            _db.Todoes.Attach(stubDelete);
-            _db.Todoes.DeleteObject(stubDelete);
+            _db.Entry(new Todo {id = id}).State = EntityState.Deleted;
             _db.SaveChanges();
+
             return new HttpResponseMessage(HttpStatusCode.NoContent);
         }
     }
