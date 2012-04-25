@@ -1,6 +1,5 @@
 define(["jquery", "underscore", "aura/facade"], 
 function ($, _, facade) {
-
     // Subscription 'modules' for our views. These take the 
     // the form facade.subscribe( subscriberName, notificationToSubscribeTo , callBack )
 
@@ -16,7 +15,7 @@ function ($, _, facade) {
     });
 
 
-    // Save models when a user has finishes editing
+    // Save models when a user has finished editing
     // Subscribes to: endContentEditing
     facade.subscribe('todoSaver','endContentEditing', function (context) {
         try {
@@ -28,7 +27,6 @@ function ($, _, facade) {
             //console.log(e);
         }
     });
-
 
     // Delete a todo when the user no longer needs it
     // Subscribes to: destroyContent

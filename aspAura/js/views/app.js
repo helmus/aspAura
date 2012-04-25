@@ -66,8 +66,7 @@ define([
               };
           },
 
-          // If you hit return in the main input field, create new **Todo** model,
-          // persisting it to *localStorage*.
+          // If you hit return in the main input field, create new **Todo** model
           createOnEnter: function (e) {
               mediator.publish('createWhenEntered', this, e, Todos);
           },

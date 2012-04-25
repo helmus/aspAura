@@ -11,7 +11,11 @@ define(['underscore', 'backbone'], function (_, Backbone) {
                 this.set({ "content": this.defaults.content });
             }
         },
-
+        parse: function (response) {
+            //delete response.EntityKey;
+            //delete response.$id;
+            return response;
+        },
         // Toggle the `done` state of this todo item.
         toggle: function () {
             this.save({ done: !this.get("done") });

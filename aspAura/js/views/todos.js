@@ -50,7 +50,6 @@ define([
 
           // Toggle the `"done"` state of the model.
           toggleDone: function () {
-               
               this.model.toggle();
           },
 

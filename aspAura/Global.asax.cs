@@ -48,7 +48,7 @@ namespace aspAura
 
             // Register JSON.NET as the default serializer ( required for e.g. entity framework serialization )
             // http://blogs.msdn.com/b/henrikn/archive/2012/02/18/using-json-net-with-asp-net-web-api.aspx
-            // This will be default in the release of web api
+            // This will ( should ) be default in the release of web api
             // http://aspnetwebstack.codeplex.com/wikipage?title=Roadmap
 
             JsonSerializerSettings serializerSettings = new JsonSerializerSettings();
