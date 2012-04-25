@@ -5,7 +5,6 @@ define(['underscore', 'backbone'], function (_, Backbone) {
             content: "empty todo...",
             done: false
         },
-        urlRoot: "/todoRoot",
         // Ensure that each todo created has `content`.
         initialize: function () {
             if (!this.get("content")) {

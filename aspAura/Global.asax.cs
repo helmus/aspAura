@@ -5,6 +5,9 @@ using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Routing;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using aspAura.Helpers;
 
 namespace aspAura
 {
@@ -33,7 +36,7 @@ namespace aspAura
                 "{controller}/{action}/{id}", // URL with parameters
                 new { controller = "Main", action = "Index", id = UrlParameter.Optional } // Parameter defaults
             );
-
+            
         }
 
         protected void Application_Start()
@@ -42,6 +45,15 @@ namespace aspAura
 
             RegisterGlobalFilters(GlobalFilters.Filters);
             RegisterRoutes(RouteTable.Routes);
+
+            // Register JSON.NET as the default serializer ( required for e.g. entity framework serialization )
+            // http://blogs.msdn.com/b/henrikn/archive/2012/02/18/using-json-net-with-asp-net-web-api.aspx
+            // This will be default in the release of web api
+            // http://aspnetwebstack.codeplex.com/wikipage?title=Roadmap
+
+            JsonSerializerSettings serializerSettings = new JsonSerializerSettings();
+            serializerSettings.Converters.Add(new IsoDateTimeConverter());
+            GlobalConfiguration.Configuration.Formatters[0] = new JsonNetFormatter(serializerSettings);
         }
     }
 }
