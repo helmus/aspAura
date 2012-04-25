@@ -101,6 +101,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\ExcludeEntityKeyContractResolver.cs" />
     <Compile Include="Helpers\JsonNetFormatter.cs" />
     <Compile Include="Models\aspAura.Designer.cs">
       <AutoGen>True</AutoGen>

@@ -47,15 +47,15 @@ namespace aspAura.Helpers
 
             // Create task reading the content
             return Task.Factory.StartNew(() =>
-                                             {
-                                                 using (StreamReader streamReader = new StreamReader(stream, Encoding))
-                                                 {
-                                                     using (JsonTextReader jsonTextReader = new JsonTextReader(streamReader))
-                                                     {
-                                                         return serializer.Deserialize(jsonTextReader, type);
-                                                     }
-                                                 }
-                                             });
+            {
+                using (StreamReader streamReader = new StreamReader(stream, Encoding))
+                {
+                    using (JsonTextReader jsonTextReader = new JsonTextReader(streamReader))
+                    {
+                        return serializer.Deserialize(jsonTextReader, type);
+                    }
+                }
+            });
         }
 
         protected override Task OnWriteToStreamAsync(Type type, object value, Stream stream, HttpContentHeaders contentHeaders, FormatterContext formatterContext, TransportContext transportContext)
@@ -65,13 +65,13 @@ namespace aspAura.Helpers
 
             // Create task writing the serialized content
             return Task.Factory.StartNew(() =>
-                                             {
-                                                 using (JsonTextWriter jsonTextWriter = new JsonTextWriter(new StreamWriter(stream, Encoding)) { CloseOutput = false })
-                                                 {
-                                                     serializer.Serialize(jsonTextWriter, value);
-                                                     jsonTextWriter.Flush();
-                                                 }
-                                             });
+            {
+                using (JsonTextWriter jsonTextWriter = new JsonTextWriter(new StreamWriter(stream, Encoding)) { CloseOutput = false })
+                {
+                    serializer.Serialize(jsonTextWriter, value);
+                    jsonTextWriter.Flush();
+                }
+            });
         }
     }
 }
