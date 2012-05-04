@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using aspAura.Models;
 
 namespace aspAura.Helpers
 {
@@ -44,7 +48,8 @@ namespace aspAura.Helpers
         {
             // Create a serializer
             JsonSerializer serializer = JsonSerializer.Create(_jsonSerializerSettings);
-
+            //var test = new StreamReader(stream, Encoding).ReadToEnd();
+           
             // Create task reading the content
             return Task.Factory.StartNew(() =>
             {
@@ -52,6 +57,11 @@ namespace aspAura.Helpers
                 {
                     using (JsonTextReader jsonTextReader = new JsonTextReader(streamReader))
                     {
+                        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(PatchModel<>))
+                        {
+                            return Activator.CreateInstance(type, new object[] { serializer.Deserialize<Dictionary<string, object>>(jsonTextReader) });
+                        }
+
                         return serializer.Deserialize(jsonTextReader, type);
                     }
                 }

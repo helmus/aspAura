@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using aspAura.Helpers;
 using aspAura.Models;
 
 namespace aspAura.Controllers.Controllers
@@ -14,7 +15,7 @@ namespace aspAura.Controllers.Controllers
         private aspAuraEntities _db;
         public TodosController()
         {
-            _db = new aspAuraEntities();
+            _db = new aspAuraEntities();  
         }
 
         // GET /api/<controller>
@@ -58,6 +59,14 @@ namespace aspAura.Controllers.Controllers
             _db.SaveChanges();
 
             return new HttpResponseMessage(HttpStatusCode.NoContent);
+        }
+
+        [AcceptVerbs("PATCH")]
+        public HttpResponseMessage Patch(PatchModel<Todo> todoPatch)
+        {
+            todoPatch.UpdateModel(_db.Todoes.Find( todoPatch.GetKeys(_db)));
+            _db.SaveChanges();
+            return new HttpResponseMessage<Todo>(HttpStatusCode.NoContent);
         }
     }
 }

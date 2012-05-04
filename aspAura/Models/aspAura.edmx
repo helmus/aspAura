@@ -14,6 +14,7 @@
           </Key>
           <Property Name="id" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
           <Property Name="content" Type="varchar" Nullable="false" MaxLength="150" />
+          <Property Name="testColumn" Type="varchar" MaxLength="150" />
           <Property Name="done" Type="bit" Nullable="false" />
         </EntityType>
       </Schema></edmx:StorageModels>
@@ -30,6 +31,7 @@
           <Property Name="id" Type="Int32" Nullable="false" />
           <Property Name="content" Type="String" Nullable="false" MaxLength="150" Unicode="false" FixedLength="false" />
           <Property Name="done" Type="Boolean" Nullable="false" />
+          <Property Type="String" Name="testColumn" MaxLength="150" FixedLength="false" Unicode="false" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
@@ -38,7 +40,8 @@
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2008/09/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="aspAuraModelStoreContainer" CdmEntityContainer="aspAuraEntities">
           <EntitySetMapping Name="Todoes"><EntityTypeMapping TypeName="aspAuraModel.Todo"><MappingFragment StoreEntitySet="Todo">
-            <ScalarProperty Name="id" ColumnName="id" />
+            <ScalarProperty Name="testColumn" ColumnName="testColumn" />
+                <ScalarProperty Name="id" ColumnName="id" />
             <ScalarProperty Name="content" ColumnName="content" />
             <ScalarProperty Name="done" ColumnName="done" />
           </MappingFragment></EntityTypeMapping></EntitySetMapping>
