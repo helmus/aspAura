@@ -1,4 +1,4 @@
-﻿//     Backbone.js 0.9.2
+//     Backbone.js 0.9.2
 
 //     (c) 2010-2012 Jeremy Ashkenas, DocumentCloud Inc.
 //     Backbone may be freely distributed under the MIT license.
@@ -57,6 +57,12 @@
   // will fake `"PUT"` and `"DELETE"` requests via the `_method` parameter and
   // set a `X-Http-Method-Override` header.
   Backbone.emulateHTTP = false;
+    
+  // Perform HTTP PATCH updates by default with only changed fields if idAttribute field exists
+  Backbone.enablePATCH = true;
+    
+  // same as emulateHTTP but only for PATCH requests. 
+  Backbone.emulatePATCH_HTTP = false;
 
   // Turn on `emulateJSON` to support legacy servers that can't deal with direct
   // `application/json` requests ... will encode the body as
@@ -202,6 +208,7 @@
     this._silent = {};
     this._pending = {};
     this._previousAttributes = _.clone(this.attributes);
+    this._lastSaveState = _.clone(this.attributes);
     this.initialize.apply(this, arguments);
   };
 
@@ -306,6 +313,7 @@
         }
       }
 
+
       // Fire the `"change"` events.
       if (!options.silent) this.change(options);
       return this;
@@ -388,8 +396,9 @@
 
       // Finish configuring and sending the Ajax request.
       options.error = Backbone.wrapError(options.error, model, options);
-      var method = this.isNew() ? 'create' : 'update';
+      var method = this.isNew() ? 'create' : Backbone.enablePATCH ? 'patch' : 'update';
       var xhr = (this.sync || Backbone.sync).call(this, method, this, options);
+      this._lastSaveState = _.clone(this.attributes);
       if (options.wait) this.set(current, silentOptions);
       return xhr;
     },
@@ -520,6 +529,13 @@
     // `"change"` event.
     previousAttributes: function() {
       return _.clone(this._previousAttributes);
+    },
+    
+    lastSaveState: function( val ) {
+      if( val ) {
+        this._lastSaveState = val;
+      }
+      return _.clone(this._lastSaveState);
     },
 
     // Check if the model is currently in a valid state. It's only possible to
@@ -1289,8 +1305,9 @@
   var methodMap = {
     'create': 'POST',
     'update': 'PUT',
+    'patch' : 'PATCH',
     'delete': 'DELETE',
-    'read':   'GET'
+    'read'  : 'GET'
   };
 
   // Override this function to change the manner in which Backbone persists
@@ -1308,6 +1325,8 @@
   // instead of `application/json` with the model in a param named `model`.
   // Useful when interfacing with server-side languages like **PHP** that make
   // it difficult to read the body of `PUT` requests.
+  
+  // modified to accept raw json instead of backbone model
   Backbone.sync = function(method, model, options) {
     var type = methodMap[method];
 
@@ -1319,32 +1338,58 @@
 
     // Ensure that we have a URL.
     if (!options.url) {
-      params.url = getValue(model, 'url') || urlError();
+        params.url = getValue(model, 'url') || urlError();
     }
 
     // Ensure that we have the appropriate request data.
-    if (!options.data && model && (method == 'create' || method == 'update')) {
+    if (!options.data && model && (method == 'create' || method == 'update' || method == 'patch')) {
       params.contentType = 'application/json';
-      params.data = JSON.stringify(model.toJSON());
+      if (method == 'patch' && model.has(model.idAttribute) ) {
+        var saveState = model.lastSaveState();
+        var patchData = { };
+        
+        for (var attr in model.attributes) {
+          var attrVal = model.get(attr);
+          if ( saveState[attr] !== attrVal ) {
+            patchData[attr] = attrVal;
+          }
+        }
+        if( _.isEmpty(patchData) ) {
+          // don't update
+          return null;
+        }
+        patchData[model.idAttribute] = model.get(model.idAttribute);
+        params.data = JSON.stringify(patchData);
+      } else {
+        params.data = JSON.stringify(model.toJSON());
+      }
     }
 
     // For older servers, emulate JSON by encoding the request into an HTML-form.
     if (Backbone.emulateJSON) {
-      params.contentType = 'application/x-www-form-urlencoded';
-      params.data = params.data ? {model: params.data} : {};
+        params.contentType = 'application/x-www-form-urlencoded';
+        params.data = params.data ? {model: params.data} : {};
     }
 
     // For older servers, emulate HTTP by mimicking the HTTP method with `_method`
     // And an `X-HTTP-Method-Override` header.
-    if (Backbone.emulateHTTP) {
-      if (type === 'PUT' || type === 'DELETE') {
+    if (Backbone.emulateHTTP || (Backbone.emulatePATCH_HTTP && type == 'PATCH')) {
+        if (type === 'PUT' || type === 'DELETE' || type == 'PATCH') {
         if (Backbone.emulateJSON) params.data._method = type;
         params.type = 'POST';
         params.beforeSend = function(xhr) {
-          xhr.setRequestHeader('X-HTTP-Method-Override', type);
+            xhr.setRequestHeader('X-HTTP-Method-Override', type);
         };
-      }
     }
+
+    // Don't process data on a non-GET request.
+    if (params.type !== 'GET' && !Backbone.emulateJSON) {
+        params.processData = false;
+    }
+
+    // Make the request, allowing the user to override any Ajax options.
+    return $.ajax(_.extend(params, options));
+    };
 
     // Don't process data on a non-GET request.
     if (params.type !== 'GET' && !Backbone.emulateJSON) {
