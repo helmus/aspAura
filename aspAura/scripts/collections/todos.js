@@ -32,5 +32,6 @@ define([
           }
 
       });
-      return new TodosCollection;
+      col = new TodosCollection;
+      return col;
   });
