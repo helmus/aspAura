@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using aspAura.Helpers;
 using aspAura.Models;
 
 namespace aspAura.Controllers.Controllers
@@ -44,13 +42,13 @@ namespace aspAura.Controllers.Controllers
             return new HttpResponseMessage<Todo>(HttpStatusCode.Created);
         }
 
-        // PUT /api/<controller>/5
-        public HttpResponseMessage Put(Todo todo)
-        {
-            _db.Entry(todo).State = EntityState.Modified;
-            _db.SaveChanges();
-            return new HttpResponseMessage(HttpStatusCode.NoContent);
-        }
+// PUT /api/<controller>/5
+public HttpResponseMessage Put(Todo todo)
+{
+    _db.Entry(todo).State = EntityState.Modified;
+    _db.SaveChanges();
+    return new HttpResponseMessage(HttpStatusCode.NoContent);
+}
 
         // DELETE /api/<controller>/5
         public HttpResponseMessage Delete(int id)
@@ -61,12 +59,19 @@ namespace aspAura.Controllers.Controllers
             return new HttpResponseMessage(HttpStatusCode.NoContent);
         }
 
-        [AcceptVerbs("PATCH")]
-        public HttpResponseMessage Patch(PatchModel<Todo> todoPatch)
-        {
-            todoPatch.UpdateModel(_db.Todoes.Find( todoPatch.GetKeys(_db)));
-            _db.SaveChanges();
-            return new HttpResponseMessage<Todo>(HttpStatusCode.NoContent);
-        }
+[AcceptVerbs("PATCH")]
+public HttpResponseMessage Patch(PatchModel<Todo> todoPatch)
+{
+    // You first have to fetch the model from the database.
+    // DbContext makes partial database updates trivial !
+    // But you always first need to fetch the data from the database...
+    Todo updateModel = _db.Todoes.Find( todoPatch.GetKeys(_db));
+    // now you can apply the received updates on our fetched model
+    todoPatch.UpdateModel(updateModel);
+    // and save the changes
+    _db.SaveChanges();
+    // http status code 204 marks the request as excecuted
+    return new HttpResponseMessage<Todo>(HttpStatusCode.NoContent);
+}
     }
 }
